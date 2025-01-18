@@ -50,18 +50,6 @@ Technical Requirements:
 - Memoized calculations
 - Optimized D3 rendering
 
-Component Structure:
-1. App.js (Main container)
-2. components/
-   - RepoInput.js
-   - VisualizationArea.js
-   - TimeTravel.js
-   - ControlPanel.js
-3. utils/
-   - githubAPI.js
-   - dataTransformers.js
-   - animations.js
-
 Styling:
 - Use Tailwind CSS
 - Dark/Light mode support
