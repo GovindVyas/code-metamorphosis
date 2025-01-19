@@ -83,19 +83,19 @@ function App() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto"
       >
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <Github className="w-12 h-12 text-blue-600" />
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-                Code Metamorphosis
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Visualize your GitHub repository's evolution
-              </p>
-            </div>
+        <div className="flex flex-col items-center mb-8">
+          <Github className="w-12 h-12 text-gray-900 dark:text-white transition-colors mb-4" />
+          <div className="text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">
+              Code Metamorphosis
+            </h1>
+            <p className="text-gray-700 dark:text-gray-300 transition-colors">
+              Visualize your GitHub repository's evolution
+            </p>
           </div>
-          <ThemeToggle />
+          <div className="absolute top-4 right-4">
+            <ThemeToggle />
+          </div>
         </div>
 
         <div className="space-y-8">
@@ -167,6 +167,23 @@ function App() {
           )}
         </div>
       </motion.div>
+
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+        <div className="container mx-auto text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            © 2024 Code Metamorphosis. Built for Github 1-day challenge by Govind Vyas with ❤️
+          </p>
+          <a 
+            href="https://github.com/GovindVyas/code-metamorphosis"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mt-1"
+          >
+            <Github className="w-4 h-4" />
+            View on GitHub
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
