@@ -235,15 +235,19 @@ export const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         />
         <button
           onClick={() => handleExport('svg')}
-          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+          title="Export as SVG"
         >
           <Download className="w-5 h-5" />
+          <span className="text-sm">SVG</span>
         </button>
         <button
           onClick={() => handleExport('png')}
-          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+          title="Export as PNG"
         >
           <Download className="w-5 h-5" />
+          <span className="text-sm">PNG</span>
         </button>
       </div>
       <div className="absolute bottom-4 right-4 z-10 flex space-x-2">
