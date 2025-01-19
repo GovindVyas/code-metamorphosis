@@ -1,52 +1,53 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 const GITHUB_API_BASE = 'https://api.github.com';
+const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
+const headers = githubToken ? { Authorization: `token ${githubToken}` } : {};
 
-export interface RepoData {
-  owner: string;
-  repo: string;
+export interface RepoDetails {
+  stargazers_count: number;
+  forks_count: number;
+  commit_count: number;
+  contributor_count: number;
 }
 
 export interface CommitData {
   sha: string;
   commit: {
     author: {
+      name: string;
       date: string;
     };
     message: string;
   };
-  files: FileChange[];
+  files?: {
+    filename: string;
+    status: string;
+    additions: number;
+    deletions: number;
+    changes: number;
+  }[];
 }
 
-export interface FileChange {
-  filename: string;
-  status: string;
-  additions: number;
-  deletions: number;
-  changes: number;
-}
+export const fetchRepoDetails = async ({ owner, repo }: { owner: string; repo: string }): Promise<RepoDetails> => {
+  const [repoData, commits, contributors] = await Promise.all([
+    axios.get(`${GITHUB_API_BASE}/repos/${owner}/${repo}`, { headers }),
+    axios.get(`${GITHUB_API_BASE}/repos/${owner}/${repo}/commits?per_page=1`, { headers }),
+    axios.get(`${GITHUB_API_BASE}/repos/${owner}/${repo}/contributors?per_page=1`, { headers }),
+  ]);
 
-// Add GitHub token if available
-const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
-const headers = githubToken ? { Authorization: `token ${githubToken}` } : {};
+  const commitCount = parseInt(commits.headers['link']?.match(/page=(\d+)>; rel="last"/)?.[1] || '0');
+  const contributorCount = parseInt(contributors.headers['link']?.match(/page=(\d+)>; rel="last"/)?.[1] || '0');
 
-const handleApiError = (error: unknown) => {
-  if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError;
-    if (axiosError.response) {
-      const status = axiosError.response.status;
-      if (status === 403) {
-        throw new Error('GitHub API rate limit exceeded. Please try again later or add a GitHub token.');
-      } else if (status === 404) {
-        throw new Error('Repository not found. Please check the URL and try again.');
-      }
-    }
-    throw new Error(axiosError.message);
-  }
-  throw new Error('An unexpected error occurred');
+  return {
+    stargazers_count: repoData.data.stargazers_count,
+    forks_count: repoData.data.forks_count,
+    commit_count: commitCount,
+    contributor_count: contributorCount,
+  };
 };
 
-export const fetchRepoCommits = async ({ owner, repo }: RepoData) => {
+export const fetchRepoCommits = async ({ owner, repo }: { owner: string; repo: string }): Promise<CommitData[]> => {
   try {
     const response = await axios.get(
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/commits`,
@@ -59,11 +60,12 @@ export const fetchRepoCommits = async ({ owner, repo }: RepoData) => {
     );
     return response.data;
   } catch (error) {
-    handleApiError(error);
+    console.error('Error fetching commits:', error);
+    throw error;
   }
 };
 
-export const fetchCommitDetails = async ({ owner, repo, sha }: RepoData & { sha: string }) => {
+export const fetchCommitDetails = async ({ owner, repo, sha }: { owner: string; repo: string; sha: string }): Promise<CommitData> => {
   try {
     const response = await axios.get(
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/commits/${sha}`,
@@ -71,6 +73,7 @@ export const fetchCommitDetails = async ({ owner, repo, sha }: RepoData & { sha:
     );
     return response.data;
   } catch (error) {
-    handleApiError(error);
+    console.error('Error fetching commit details:', error);
+    throw error;
   }
 };
