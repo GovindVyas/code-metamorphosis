@@ -168,20 +168,22 @@ function App() {
         </div>
       </motion.div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-        <div className="container mx-auto text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            © 2024 Code Metamorphosis. Built for Github 1-day challenge by Govind Vyas with ❤️
-          </p>
-          <a 
-            href="https://github.com/GovindVyas/code-metamorphosis"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mt-1"
-          >
-            <Github className="w-4 h-4" />
-            View on GitHub
-          </a>
+      <div className="min-h-screen pb-32">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-10">
+          <div className="container mx-auto text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              © 2024 Code Metamorphosis. Built for Github 1-day challenge by Govind Vyas with ❤️
+            </p>
+            <a 
+              href="https://github.com/GovindVyas/code-metamorphosis"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mt-1"
+            >
+              <Github className="w-4 h-4" />
+              View on GitHub
+            </a>
+          </div>
         </div>
       </div>
     </div>
