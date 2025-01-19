@@ -30,10 +30,15 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ node, onClose }) => {
   if (!node) return null;
 
   return (
-    <div className="absolute right-0 top-0 w-80 h-full bg-white dark:bg-gray-800 shadow-lg p-4 overflow-y-auto">
+    <div 
+      className="absolute right-0 top-0 w-80 h-full bg-white dark:bg-gray-800 shadow-lg p-4 overflow-y-auto"
+      role="dialog"
+      aria-label="File details"
+    >
       <button
         onClick={onClose}
-        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+        aria-label="Close details panel"
       >
         ×
       </button>
@@ -58,6 +63,7 @@ export const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [zoom, setZoom] = useState(1);
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!data || !svgRef.current) return;
@@ -132,19 +138,27 @@ export const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       .data(filteredNodes)
       .enter()
       .append('g')
-      .call(drag(simulation) as any)
-      .on('click', (event: any, d: Node) => {
-        setSelectedNode(d);
+      .attr('role', 'button')
+      .attr('tabindex', 0)
+      .attr('aria-label', (d: Node) => `File ${d.id} with ${d.value} changes`)
+      .attr('aria-selected', (d: Node) => (d.id === focusedNodeId).toString())
+      .on('keydown', (event: KeyboardEvent, d: Node) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          setSelectedNode(d);
+          setFocusedNodeId(d.id);
+        }
       })
-      .on('mouseover', function(event: any, d: Node) {
-        d3.select(this)
+      .on('focus', (event: any, d: Node) => {
+        setFocusedNodeId(d.id);
+        d3.select(event.currentTarget)
           .select('circle')
           .transition()
           .duration(200)
           .attr('r', (d: any) => Math.sqrt(d.value) * 2.5);
       })
-      .on('mouseout', function(event: any, d: Node) {
-        d3.select(this)
+      .on('blur', (event: any) => {
+        d3.select(event.currentTarget)
           .select('circle')
           .transition()
           .duration(200)
@@ -177,10 +191,14 @@ export const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       nodes.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
     });
 
+    // Add description for screen readers
+    svg.append('desc')
+      .text(`Network visualization of ${filteredNodes.length} files and their relationships based on commit history`);
+
     return () => {
       simulation.stop();
     };
-  }, [data, timelinePosition, searchTerm]);
+  }, [data, timelinePosition, searchTerm, focusedNodeId]);
 
   const handleExport = (format: 'png' | 'svg') => {
     const svgElement = svgRef.current;
@@ -226,43 +244,70 @@ export const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       className="relative w-full h-[600px] bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden"
     >
       <div className="absolute top-4 left-4 z-10 flex space-x-2">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search files..."
-          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-        />
-        <button
-          onClick={() => handleExport('svg')}
-          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-          title="Export as SVG"
-        >
-          <Download className="w-5 h-5" />
-          <span className="text-sm">SVG</span>
-        </button>
-        <button
-          onClick={() => handleExport('png')}
-          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-          title="Export as PNG"
-        >
-          <Download className="w-5 h-5" />
-          <span className="text-sm">PNG</span>
-        </button>
+        <div role="search">
+          <label htmlFor="file-search" className="sr-only">
+            Search files
+          </label>
+          <input
+            id="file-search"
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search files..."
+            className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            aria-label="Search files"
+          />
+        </div>
+        <div className="flex space-x-2" role="toolbar" aria-label="Visualization controls">
+          <button
+            onClick={() => handleExport('svg')}
+            className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Export as SVG"
+          >
+            <Download className="w-5 h-5" aria-hidden="true" />
+            <span className="text-sm">SVG</span>
+          </button>
+          <button
+            onClick={() => handleExport('png')}
+            className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Export as PNG"
+          >
+            <Download className="w-5 h-5" aria-hidden="true" />
+            <span className="text-sm">PNG</span>
+          </button>
+        </div>
       </div>
+
       <div className="absolute bottom-4 right-4 z-10 flex space-x-2">
-        <span className="px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <span 
+          className="px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow"
+          role="status"
+          aria-label="Zoom level"
+        >
           {Math.round(zoom * 100)}%
         </span>
       </div>
+
+      <div className="sr-only">
+        Interactive network visualization showing file relationships and changes in the repository
+      </div>
+
       <svg
         ref={svgRef}
         className="w-full h-full"
+        role="img"
+        aria-label="Code changes visualization"
       />
-      <DetailPanel
-        node={selectedNode}
-        onClose={() => setSelectedNode(null)}
-      />
+
+      {selectedNode && (
+        <DetailPanel
+          node={selectedNode}
+          onClose={() => {
+            setSelectedNode(null);
+            setFocusedNodeId(null);
+          }}
+        />
+      )}
     </motion.div>
   );
 };

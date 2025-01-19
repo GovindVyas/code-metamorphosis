@@ -89,8 +89,11 @@ function App() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto pb-16"
       >
-        <div className="flex flex-col items-center mb-8">
-          <Github className="w-12 h-12 text-gray-900 dark:text-white transition-colors mb-4" />
+        <header className="flex flex-col items-center mb-8">
+          <Github 
+            className="w-12 h-12 text-gray-900 dark:text-white transition-colors mb-4" 
+            aria-hidden="true"
+          />
           <div className="text-center">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">
               Code Metamorphosis
@@ -102,95 +105,98 @@ function App() {
           <div className="absolute top-4 right-4">
             <ThemeToggle />
           </div>
-        </div>
-
-        <div className="space-y-8">
-          <div>
-            <RepoInput
-              onSubmit={setRepoInfo}
-              isLoading={isLoading}
-              label="Repository"
-            />
-          </div>
-
-          {isLoading && (
-            <div className="text-center mt-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">Loading repository data...</p>
-            </div>
-          )}
-
-          {apiError && (
-            <div className="mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              <p className="font-medium">Error loading repository data:</p>
-              <p>{apiError instanceof Error ? apiError.message : 'An unexpected error occurred'}</p>
-            </div>
-          )}
-
-          {commitDetails && repoDetails && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-8"
-            >
-              <Analytics
-                data={commitDetails}
-                repoDetails={repoDetails}
-                timelinePosition={timelinePosition}
+        </header>
+        
+        <main>
+          <div className="space-y-8">
+            <div>
+              <RepoInput
+                onSubmit={setRepoInfo}
+                isLoading={isLoading}
+                label="Repository"
               />
+            </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">File Distribution</h2>
-                  <FileDistribution data={fileStats} />
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">Commit Timeline</h2>
-                  <CommitTimeline
-                    commits={commits?.map((commit: any) => ({
-                      ...commit,
-                      branch: 'main', // You might want to fetch actual branch information
-                    }))}
-                  />
-                </div>
+            {isLoading && (
+              <div className="text-center mt-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-gray-600 dark:text-gray-400">Loading repository data...</p>
               </div>
+            )}
 
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Code Changes Visualization</h2>
-                <VisualizationArea
+            {apiError && (
+              <div className="mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                <p className="font-medium">Error loading repository data:</p>
+                <p>{apiError instanceof Error ? apiError.message : 'An unexpected error occurred'}</p>
+              </div>
+            )}
+
+            {commitDetails && repoDetails && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-8"
+              >
+                <Analytics
                   data={commitDetails}
+                  repoDetails={repoDetails}
                   timelinePosition={timelinePosition}
                 />
-              </div>
 
-              <TimelineControl
-                startDate={startDate}
-                endDate={endDate}
-                position={timelinePosition}
-                onChange={setTimelinePosition}
-              />
-            </motion.div>
-          )}
-        </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h2 className="text-xl font-semibold mb-4">File Distribution</h2>
+                    <FileDistribution data={fileStats} />
+                  </div>
+
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h2 className="text-xl font-semibold mb-4">Commit Timeline</h2>
+                    <CommitTimeline
+                      commits={commits?.map((commit: any) => ({
+                        ...commit,
+                        branch: 'main', // You might want to fetch actual branch information
+                      }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4">Code Changes Visualization</h2>
+                  <VisualizationArea
+                    data={commitDetails}
+                    timelinePosition={timelinePosition}
+                  />
+                </div>
+
+                <TimelineControl
+                  startDate={startDate}
+                  endDate={endDate}
+                  position={timelinePosition}
+                  onChange={setTimelinePosition}
+                />
+              </motion.div>
+            )}
+          </div>
+        </main>
+
+        <footer className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 z-10">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              © 2024 Code Metamorphosis. Built by Govind Vyas with ❤️
+            </p>
+            <a 
+              href="https://github.com/GovindVyas/code-metamorphosis"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+              aria-label="View source code on GitHub"
+            >
+              <Github className="w-4 h-4" aria-hidden="true" />
+              View on GitHub
+            </a>
+          </div>
+        </footer>
       </motion.div>
-
-      <footer className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            © 2024 Code Metamorphosis. Built by Govind Vyas with ❤️
-          </p>
-          <a 
-            href="https://github.com/GovindVyas/code-metamorphosis"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-          >
-            <Github className="w-4 h-4" />
-            View on GitHub
-          </a>
-        </div>
-      </footer>
     </div>
   );
 }

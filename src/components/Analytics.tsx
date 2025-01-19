@@ -21,18 +21,30 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, description }) 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg"
+    role="article"
+    aria-labelledby={`stat-${title.toLowerCase().replace(/\s+/g, '-')}`}
   >
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
+        <h3 
+          id={`stat-${title.toLowerCase().replace(/\s+/g, '-')}`}
+          className="text-sm font-medium text-gray-600 dark:text-gray-400"
+        >
+          {title}
+        </h3>
         <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
           {typeof value === 'number' && value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value}
         </p>
         {description && (
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {description}
+          </p>
         )}
       </div>
-      <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+      <div 
+        className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full" 
+        aria-hidden="true"
+      >
         {icon}
       </div>
     </div>

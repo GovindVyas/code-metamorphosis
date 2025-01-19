@@ -22,6 +22,7 @@ interface CommitTimelineProps {
 export const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits = [] }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedCommit, setSelectedCommit] = useState<Commit | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<[Date, Date]>(() => {
     if (!commits.length) return [new Date(), new Date()];
     
@@ -76,25 +77,44 @@ export const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits = [] }) 
       .attr('transform', d => {
         const date = new Date(d.commit.author.date);
         return `translate(${x(date)},${height/2})`;
-      });
+      })
+      .attr('role', 'button')
+      .attr('tabindex', 0)
+      .attr('aria-label', d => 
+        `Commit on ${format(new Date(d.commit.author.date), 'PPP')} by ${d.commit.author.name}: ${d.commit.message}`
+      );
 
     commitGroups.append('circle')
       .attr('r', 4)
       .attr('fill', '#4299e1')
-      .on('mouseover', (event, d) => {
-        setSelectedCommit(d);
+      .attr('role', 'presentation');
+
+    // Add keyboard navigation
+    commitGroups
+      .on('keydown', (event, d) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          setSelectedCommit(d);
+        }
+      })
+      .on('focus', (event, d) => {
         d3.select(event.currentTarget)
+          .select('circle')
           .transition()
           .duration(200)
           .attr('r', 6);
       })
-      .on('mouseout', (event) => {
-        setSelectedCommit(null);
+      .on('blur', (event) => {
         d3.select(event.currentTarget)
+          .select('circle')
           .transition()
           .duration(200)
           .attr('r', 4);
       });
+
+    // Add description for screen readers
+    svg.append('desc')
+      .text(`Timeline showing ${validCommits.length} commits from ${format(dateRange[0], 'PPP')} to ${format(dateRange[1], 'PPP')}`);
 
     // Add branch lines
     const branches = Array.from(new Set(validCommits.map(c => c.branch)));
@@ -118,7 +138,10 @@ export const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits = [] }) 
 
   if (!commits.length) {
     return (
-      <div className="flex items-center justify-center h-[200px] text-gray-500">
+      <div 
+        className="flex items-center justify-center h-[200px] text-gray-500"
+        role="alert"
+      >
         No commit data available
       </div>
     );
@@ -126,18 +149,34 @@ export const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits = [] }) 
 
   return (
     <div className="relative">
+      <div className="sr-only">
+        Commit timeline visualization showing repository activity over time
+      </div>
       <svg
         ref={svgRef}
         className="w-full h-[200px]"
+        role="img"
+        aria-label="Repository commit timeline"
       />
       {selectedCommit && (
-        <div className="absolute top-0 left-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
+        <div 
+          className="absolute top-0 left-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg"
+          role="dialog"
+          aria-label="Commit details"
+        >
           <p className="font-medium">{selectedCommit.commit.message}</p>
           <p className="text-sm text-gray-500">
             {selectedCommit.commit.author.name} on{' '}
             {format(new Date(selectedCommit.commit.author.date), 'PPP')}
           </p>
           <p className="text-sm text-gray-500">Branch: {selectedCommit.branch}</p>
+          <button
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            onClick={() => setSelectedCommit(null)}
+            aria-label="Close commit details"
+          >
+            ×
+          </button>
         </div>
       )}
     </div>
