@@ -42,13 +42,13 @@ function App() {
     retry: 2,
   });
 
-  const { data: repoDetails, isLoading: isLoadingDetails } = useQuery({
+  const { data: repoDetails, isLoading: isLoadingRepoDetails } = useQuery({
     queryKey: ['repoDetails', repoInfo?.owner, repoInfo?.repo],
     queryFn: () => repoInfo ? fetchRepoDetails(repoInfo) : null,
     enabled: !!repoInfo,
   });
 
-  const isLoading = isLoadingCommits || isLoadingDetails || isLoadingDetails;
+  const isLoading = isLoadingCommits || isLoadingDetails || isLoadingRepoDetails;
   const apiError = commitsError || detailsError;
 
   const startDate = commits?.[commits.length - 1]?.commit?.author?.date
