@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, GitFork, Eye, FileText, GitCommit, Calendar, BarChart2 } from 'lucide-react';
+import { Star, GitFork, Eye, FileText, GitCommit, Calendar, BarChart2, Scale } from 'lucide-react';
 import { CommitData, RepoDetails } from '../lib/github';
 
 interface AnalyticsProps {
@@ -41,14 +41,15 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, description }) 
 
 export const Analytics: React.FC<AnalyticsProps> = ({ data, repoDetails, timelinePosition }) => {
   const stats = React.useMemo(() => {
-    const relevantCommits = data.slice(0, Math.floor(data.length * timelinePosition));
+    // Use the total commit count from repoDetails instead of the current data slice
+    const totalCommits = repoDetails.commit_count;
     
-    // Calculate total changes and files changed
+    // Calculate files changed and total changes
     let totalChanges = 0;
     const uniqueFiles = new Set<string>();
     const activeDays = new Set<string>();
 
-    relevantCommits.forEach(commit => {
+    data.forEach(commit => {
       commit.files?.forEach(file => {
         totalChanges += file.changes;
         uniqueFiles.add(file.filename);
@@ -61,13 +62,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ data, repoDetails, timelin
     return {
       stars: repoDetails.stargazers_count,
       forks: repoDetails.forks_count,
-      watchers: repoDetails.watchers_count,
+      watchers: repoDetails.subscribers_count, // Use subscribers_count for actual watchers
       filesChanged: uniqueFiles.size,
       totalChanges,
-      commits: relevantCommits.length,
+      commits: totalCommits, // Use the total commit count
       activeDays: activeDays.size,
+      license: repoDetails.license?.name || 'No License'
     };
-  }, [data, timelinePosition, repoDetails]);
+  }, [data, repoDetails]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -106,6 +108,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ data, repoDetails, timelin
         title="Active Days"
         value={stats.activeDays}
         icon={<Calendar className="w-6 h-6 text-orange-500" />}
+      />
+      <StatCard
+        title="License"
+        value={stats.license}
+        icon={<Scale className="w-6 h-6 text-teal-500" />}
       />
     </div>
   );

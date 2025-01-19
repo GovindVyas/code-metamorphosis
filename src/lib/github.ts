@@ -8,8 +8,14 @@ export interface RepoDetails {
   stargazers_count: number;
   forks_count: number;
   watchers_count: number;
+  subscribers_count: number;
   commit_count: number;
   contributor_count: number;
+  license: {
+    key: string;
+    name: string;
+    url: string;
+  } | null;
 }
 
 export interface CommitData {
@@ -44,8 +50,10 @@ export const fetchRepoDetails = async ({ owner, repo }: { owner: string; repo: s
     stargazers_count: repoData.data.stargazers_count,
     forks_count: repoData.data.forks_count,
     watchers_count: repoData.data.watchers_count,
+    subscribers_count: repoData.data.subscribers_count,
     commit_count: commitCount,
     contributor_count: contributorCount,
+    license: repoData.data.license,
   };
 };
 
